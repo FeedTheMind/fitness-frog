@@ -41,14 +41,40 @@ namespace Treehouse.FitnessFrog.Controllers
 
         public ActionResult Add()
         {
-            return View();
+            var entry = new Entry()
+            {
+                Date = DateTime.Today,
+            };
+
+            ViewBag.ActivitiesSelectListItems = new SelectList(
+                Data.Data.Activities, "Id", "Name");
+
+            return View(entry);
         }
 
-        [ActionName("Add"), HttpPost]
-        public ActionResult AddPost()
+        [HttpPost]
+        public ActionResult Add(Entry entry)
         {
 
-            return View();
+            // If "Duration" field validation errors missing
+            // then make certain duration is > 0
+            if (ModelState.IsValidField("Duration") && entry.Duration <= 0)
+            {
+                ModelState.AddModelError("Duration", "The Duration field value must be greater than zero.");
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                _entriesRepository.AddEntry(entry);
+
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.ActivitiesSelectListItems = new SelectList(
+                Data.Data.Activities, "Id", "Name");
+
+            return View(entry);
         }
 
         public ActionResult Edit(int? id)
